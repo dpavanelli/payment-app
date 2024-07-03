@@ -6,8 +6,8 @@ clean:
 build:
 	mkdir -p build
 	docker run --rm --user $(id -u):$(id -g)\
-                  -v ${CURDIR}:/workspace \
-                  -w /workspace \
+                  -v ${CURDIR}:/frontend \
+                  -w /frontend \
                   node:22.4-alpine3.19 \
                   sh -c "npm install && npm run build"
 
