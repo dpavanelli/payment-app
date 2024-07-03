@@ -1,0 +1,175 @@
+openapi: 3.0.1
+info:
+  title: Payment API
+  description: API for managing payments and webhooks
+  version: v0.0.1
+  license:
+    name: Apache 2.0
+    url: http://springdoc.org
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/payments:
+    post:
+      summary: Create a new payment
+      requestBody:
+        description: Payment to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentDTO'
+            examples:
+              example-1:
+                summary: A sample payment
+                value:
+                  firstName: John
+                  lastName: Doe
+                  zipCode: 12345
+                  cardNumber: 1234567812345678
+      responses:
+        '201':
+          description: Payment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDTO'
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    firstName: John
+                    lastName: Doe
+                    zipCode: 12345
+                    cardNumber: 1234567812345678
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidInput:
+                  summary: Invalid input response
+                  value:
+                    message: Invalid input
+                    details: First name is required
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error response
+                  value:
+                    message: Validation error
+                    details: Zip code must be at least 5 digits
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  summary: Server error response
+                  value:
+                    message: An unexpected error occurred
+                    details: Please contact support
+  /api/webhooks:
+    post:
+      summary: Register a new webhook
+      requestBody:
+        description: Webhook to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookDTO'
+            examples:
+              example-1:
+                summary: A sample webhook
+                value:
+                  url: http://example.com/webhook
+      responses:
+        '201':
+          description: Webhook registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookDTO'
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    url: http://example.com/webhook
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidInput:
+                  summary: Invalid input response
+                  value:
+                    message: Invalid input
+                    details: URL is not valid
+        '409':
+          description: Duplicate URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicateUrl:
+                  summary: Duplicate URL response
+                  value:
+                    message: Webhook URL already exists
+                    details: Please provide a unique URL
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  summary: Server error response
+                  value:
+                    message: An unexpected error occurred
+                    details: Please contact support
+components:
+  schemas:
+    PaymentDTO:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        zipCode:
+          type: string
+        cardNumber:
+          type: string
+      required:
+        - firstName
+        - lastName
+        - zipCode
+        - cardNumber
+    WebhookDTO:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        details:
+          type: string

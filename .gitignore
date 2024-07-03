@@ -1,0 +1,8 @@
+node_modules
+build
+.gradle
+.idea
+*.iml
+.cache
+out
+.run
