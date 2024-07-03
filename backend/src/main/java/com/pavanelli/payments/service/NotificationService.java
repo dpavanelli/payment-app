@@ -8,9 +8,7 @@ import com.pavanelli.payments.repository.PendingNotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,10 @@ public class NotificationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Payment> request = new HttpEntity<>(payment, headers);
         try {
-            restTemplate.postForEntity(url, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.CREATED) {
+                throw new IllegalStateException("Webhook response " + response.getStatusCode().value() + ": " + response.getBody());
+            }
         } catch (Exception e) {
             logger.warn("Failed to notify webhook {}: {}. A retry will be scheduled for this payment", webhook.getUrl(), e);
             pendingNotificationRepository.save(new PendingNotification(url, payment.getId()));
@@ -61,7 +62,10 @@ public class NotificationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Payment> request = new HttpEntity<>(payment, headers);
         try {
-            restTemplate.postForEntity(pendingNotification.getUrl(), request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(pendingNotification.getUrl(), request, String.class);
+            if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.CREATED) {
+                throw new IllegalStateException("Webhook response " + response.getStatusCode().value() + ": " + response.getBody());
+            }
             pendingNotificationRepository.delete(pendingNotification);
         } catch (Exception e) {
             if (pendingNotification.getRetries() < MAX_RETRIES) {

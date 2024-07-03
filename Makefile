@@ -12,4 +12,4 @@ start:
 	docker-compose up --build -d
 
 stop:
-	docker-compose stop
+	docker-compose down
